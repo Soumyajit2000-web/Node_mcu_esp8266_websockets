@@ -8,12 +8,43 @@
 
 #define WIFI_SSID "Das Residence"
 #define WIFI_PASSWORD "Jayanta@1964"
-#define WS_HOST ""
-#define WS_PORT 8880
+#define WS_HOST "192.168.0.101"
+#define WS_PORT 3000
 #define WS_URL "/socket.io/?EIO=4"
 
 ESP8266WiFiMulti wifiMulti;
 SocketIOclient socketIO;
+
+void controlDigitalPins(uint8_t *message)
+{
+  // Allocate a temporary JsonDocument
+  StaticJsonDocument<200> doc;
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, message);
+
+  // Test if parsing succeeds
+  if (error)
+  {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return;
+  }
+
+  // Extract values
+  const char *event = doc[0];
+  const char *payload = doc[1];
+
+  // Handle the event
+  if (strcmp(event, "message") == 0)
+  {
+    Serial.println(payload);
+  }
+  else if (strcmp(event, "digital") == 0)
+  {
+    Serial.println(payload);
+  }
+}
 
 void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
 {
@@ -21,16 +52,17 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
   {
   case sIOtype_DISCONNECT:
     Serial.printf("[IOc] Disconnected!\n");
-    digitalWrite(LED_BUILTIN, HIGH); //My board LED_BUILTIN is off at HIGH
+    digitalWrite(LED_BUILTIN, HIGH); // My board LED_BUILTIN is off at HIGH
     break;
   case sIOtype_CONNECT:
     Serial.printf("[IOc] Connected to url: %s\n", payload);
-    digitalWrite(LED_BUILTIN, LOW); //My board LED_BUILTIN is on at LOW
+    digitalWrite(LED_BUILTIN, LOW); // My board LED_BUILTIN is on at LOW
     // join default namespace (no auto join in Socket.IO V3)
     socketIO.send(sIOtype_CONNECT, "/");
     break;
   case sIOtype_EVENT:
-    Serial.printf("[IOc] get event: %s\n", payload);
+    // Serial.printf("[IOc] get event: %s\n", payload);
+    controlDigitalPins(payload);
     break;
   case sIOtype_ACK:
     Serial.printf("[IOc] get ack: %u\n", length);
@@ -55,7 +87,7 @@ void setup()
 {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH); //My board LED_BUILTIN is off at HIGH
+  digitalWrite(LED_BUILTIN, HIGH); // My board LED_BUILTIN is off at HIGH
 
   // Serial.setDebugOutput(true);
   Serial.setDebugOutput(true);
@@ -109,9 +141,8 @@ void loop()
     DynamicJsonDocument doc(1024);
     JsonArray array = doc.to<JsonArray>();
 
-    // TODO: add event name
     // Hint: socket.on('event_name', ....
-    array.add("event_name");
+    array.add("ping");
 
     // add payload (parameters) for the event
     JsonObject param1 = array.createNestedObject();
@@ -125,6 +156,6 @@ void loop()
     socketIO.sendEVENT(output);
 
     // Print JSON for debugging
-    Serial.println(output);
+    // Serial.println(output);
   }
 }
