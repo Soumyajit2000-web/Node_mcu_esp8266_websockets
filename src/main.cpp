@@ -15,6 +15,12 @@
 ESP8266WiFiMulti wifiMulti;
 SocketIOclient socketIO;
 
+struct PinStatus
+{
+  int pin;
+  int status;
+};
+
 void controlDigitalPins(uint8_t *message)
 {
   // Allocate a temporary JsonDocument
@@ -43,6 +49,23 @@ void controlDigitalPins(uint8_t *message)
   else if (strcmp(event, "digital") == 0)
   {
     Serial.println(payload);
+    StaticJsonDocument<200> pinDoc;
+
+    DeserializationError pinDeserializeError = deserializeJson(pinDoc, payload);
+
+    if (pinDeserializeError)
+    {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(pinDeserializeError.f_str());
+      return;
+    }
+
+    PinStatus pinstatus;
+    pinstatus.pin = pinDoc["pin"];
+    pinstatus.status = pinDoc["status"];
+    Serial.printf("Pin: %d\n", pinstatus.pin);
+    Serial.printf("Status: %d\n", pinstatus.status);
+    digitalWrite(pinstatus.pin, pinstatus.status);
   }
 }
 
@@ -87,7 +110,13 @@ void setup()
 {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(D0, OUTPUT);
+  pinMode(D1, OUTPUT);
+  pinMode(D2, OUTPUT);
+  pinMode(D3, OUTPUT);
+  pinMode(D4, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH); // My board LED_BUILTIN is off at HIGH
+
 
   // Serial.setDebugOutput(true);
   Serial.setDebugOutput(true);
