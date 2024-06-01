@@ -5,12 +5,7 @@
 #include <ESP8266WiFiMulti.h>
 #include <WebSocketsClient.h>
 #include <SocketIOclient.h>
-
-#define WIFI_SSID "Das Residence"
-#define WIFI_PASSWORD "Jayanta@1964"
-#define WS_HOST "nodemcu-esp8266-server.onrender.com"
-#define WS_PORT 443
-#define WS_URL "/socket.io/?EIO=4"
+#include "config.h"
 
 // TLS certificate to enable secure websockets
 // const char ENDPOINT_CA_CERT[] PROGMEM = R"EOF(
