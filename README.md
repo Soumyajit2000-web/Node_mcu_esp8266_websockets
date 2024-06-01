@@ -4,8 +4,9 @@ This is a codebase for demonstration of connecting a NodeMCU ESP8266 to a node s
 
 ## Prerequisite
 
+- [Platform IO](https://platformio.org/install/)
 - NodeMCU ESP8266 module
-- Drivers for ESP module
+- Drivers for ESP module (If windows. Not sure about other os.)
 - [Backend](https://github.com/Soumyajit2000-web/nodemcu_esp8266_server)
 
 ## Project Structure
